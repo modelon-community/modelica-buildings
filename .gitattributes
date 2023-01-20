@@ -10,3 +10,4 @@ VCRUNTIME*.dll filter=lfs diff=lfs merge=lfs -text
 #Buildings/Resources/src/ThermalZones/EnergyPlus*/FMUs/Zones3.fmu filter=lfs diff=lfs merge=lfs -text
 #Buildings/Resources/bin/spawn-*/linux64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
 #Buildings/Resources/bin/spawn-*/win64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
+#Buildings/Resources/bin/spawn-*/linux64/bin/*spawn-0.3.0-8eba810cde binary
