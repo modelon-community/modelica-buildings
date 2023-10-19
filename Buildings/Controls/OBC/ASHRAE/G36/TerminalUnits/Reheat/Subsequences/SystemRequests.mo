@@ -6,41 +6,45 @@ block SystemRequests "Output system requests for VAV terminal unit with reheat"
   parameter Real thrTemDif(
     final unit="K",
     final quantity="TemperatureDifference")=3
-    "Threshold difference between zone temperature and cooling setpoint for generating 3 cooling SAT reset requests";
+    "Threshold difference between zone temperature and cooling setpoint for generating 3 cooling SAT reset requests"
+    annotation (__cdl(ValueInReference=true));
   parameter Real twoTemDif(
     final unit="K",
     final quantity="TemperatureDifference")=2
-    "Threshold difference between zone temperature and cooling setpoint for generating 2 cooling SAT reset requests";
+    "Threshold difference between zone temperature and cooling setpoint for generating 2 cooling SAT reset requests"
+    annotation (__cdl(ValueInReference=true));
   parameter Real thrTDis_1(
     final unit="K",
     final quantity="TemperatureDifference")=17
     "Threshold difference between discharge air temperature and its setpoint for generating 3 hot water reset requests"
-    annotation(Dialog(enable=have_hotWatCoi));
+    annotation (__cdl(ValueInReference=true), Dialog(enable=have_hotWatCoi));
   parameter Real thrTDis_2(
     final unit="K",
     final quantity="TemperatureDifference")=8
     "Threshold difference between discharge air temperature and its setpoint for generating 2 hot water reset requests"
-    annotation(Dialog(enable=have_hotWatCoi));
+    annotation (__cdl(ValueInReference=true), Dialog(enable=have_hotWatCoi));
   parameter Real durTimTem(
     final unit="s",
     final quantity="Time")=120
     "Duration time of zone temperature exceeds setpoint"
-    annotation(Dialog(group="Duration times"));
+    annotation (__cdl(ValueInReference=true), Dialog(group="Duration times"));
   parameter Real durTimFlo(
     final unit="s",
     final quantity="Time")=60
     "Duration time of airflow rate less than setpoint"
-    annotation(Dialog(group="Duration times"));
+    annotation (__cdl(ValueInReference=true), Dialog(group="Duration times"));
   parameter Real durTimDisAir(
     final unit="s",
     final quantity="Time")=300
     "Duration time of discharge air temperature less than setpoint"
-    annotation(Dialog(group="Duration times", enable=have_hotWatCoi));
+    annotation (__cdl(ValueInReference=true),
+                Dialog(group="Duration times", enable=have_hotWatCoi));
   parameter Real dTHys(
     final unit="K",
     final quantity="TemperatureDifference")=0.25
     "Near zero temperature difference, below which the difference will be seen as zero"
-    annotation (Dialog(tab="Advanced", enable=have_hotWatCoi));
+    annotation (__cdl(ValueInReference=false),
+                Dialog(tab="Advanced", enable=have_hotWatCoi));
   parameter Real floHys(
     final quantity="VolumeFlowRate",
     final unit="m3/s")
@@ -61,7 +65,7 @@ block SystemRequests "Output system requests for VAV terminal unit with reheat"
     final unit="s",
     final quantity="Time")=120
     "Sample period of component, set to the same value as the trim and respond that process yPreSetReq"
-    annotation (Dialog(tab="Advanced"));
+    annotation (__cdl(ValueInReference=false), Dialog(tab="Advanced"));
 
   Buildings.Controls.OBC.CDL.Interfaces.BooleanInput uAftSup
     "After suppression period due to the setpoint change"
@@ -148,34 +152,34 @@ block SystemRequests "Output system requests for VAV terminal unit with reheat"
         iconTransformation(extent={{100,-100},{140,-60}})));
 
 protected
-  Buildings.Controls.OBC.CDL.Continuous.Less les(
+  Buildings.Controls.OBC.CDL.Reals.Less les(
     final h=dTHys) if have_hotWatCoi
     "Check if discharge temperature is less than setpoint by a threshold"
     annotation (Placement(transformation(extent={{-60,-150},{-40,-130}})));
-  Buildings.Controls.OBC.CDL.Continuous.Less les1(
+  Buildings.Controls.OBC.CDL.Reals.Less les1(
     final h=dTHys) if have_hotWatCoi
     "Check if discharge temperature is less than setpoint by a threshold"
     annotation (Placement(transformation(extent={{-60,-190},{-40,-170}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr1(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr1(
     final t=thrTemDif,
     final h=dTHys)
     "Check if zone temperature is greater than cooling setpoint by threshold"
     annotation (Placement(transformation(extent={{-60,210},{-40,230}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr2(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr2(
     final t=twoTemDif,
     final h=dTHys)
     "Check if zone temperature is greater than cooling setpoint by threshold"
     annotation (Placement(transformation(extent={{-60,170},{-40,190}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr3(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr3(
     final t=0.95,
     final h=damPosHys)
     "Check if damper position is greater than 0.95"
     annotation (Placement(transformation(extent={{-120,-60},{-100,-40}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr(
     final t=0.95, final h=looHys)
     "Check if cooling loop signal is greater than 0.95"
     annotation (Placement(transformation(extent={{-60,120},{-40,140}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr4(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr4(
     final t=floHys,
     final h=0.5*floHys)
     "Check if discharge airflow setpoint is greater than 0"
@@ -186,18 +190,18 @@ protected
   Buildings.Controls.OBC.CDL.Conversions.BooleanToInteger booToInt1
     "Convert boolean to integer"
     annotation (Placement(transformation(extent={{40,-60},{60,-40}})));
-  Buildings.Controls.OBC.CDL.Continuous.MultiplyByParameter gai1(
+  Buildings.Controls.OBC.CDL.Reals.MultiplyByParameter gai1(
     final k=0.5)
     "50% of setpoint"
     annotation (Placement(transformation(extent={{-120,40},{-100,60}})));
-  Buildings.Controls.OBC.CDL.Continuous.MultiplyByParameter gai2(
+  Buildings.Controls.OBC.CDL.Reals.MultiplyByParameter gai2(
     final k=0.7)
     "70% of setpoint"
     annotation (Placement(transformation(extent={{-120,0},{-100,20}})));
-  Buildings.Controls.OBC.CDL.Continuous.Subtract sub2
+  Buildings.Controls.OBC.CDL.Reals.Subtract sub2
     "Calculate difference between zone temperature and cooling setpoint"
     annotation (Placement(transformation(extent={{-100,210},{-80,230}})));
-  Buildings.Controls.OBC.CDL.Continuous.Subtract sub3
+  Buildings.Controls.OBC.CDL.Reals.Subtract sub3
     "Calculate difference between zone temperature and cooling setpoint"
     annotation (Placement(transformation(extent={{-100,170},{-80,190}})));
   Buildings.Controls.OBC.CDL.Logical.And and1
@@ -248,22 +252,22 @@ protected
   Buildings.Controls.OBC.CDL.Logical.TrueDelay tim3(
     final delayTime=durTimFlo) "Check if it is more than threshold time"
     annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
-  Buildings.Controls.OBC.CDL.Continuous.Greater greEqu(
+  Buildings.Controls.OBC.CDL.Reals.Greater greEqu(
     final h=floHys)
     "Check if discharge airflow is less than 50% of setpoint"
     annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
-  Buildings.Controls.OBC.CDL.Continuous.Greater greEqu1(
+  Buildings.Controls.OBC.CDL.Reals.Greater greEqu1(
     final h=floHys)
     "Check if discharge airflow is less than 70% of setpoint"
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
   Buildings.Controls.OBC.CDL.Logical.And and5
     "Logical and"
     annotation (Placement(transformation(extent={{-20,70},{0,90}})));
-  Buildings.Controls.OBC.CDL.Continuous.AddParameter addPar(
+  Buildings.Controls.OBC.CDL.Reals.AddParameter addPar(
     final p=thrTDis_1) if have_hotWatCoi
     "Discharge temperature plus threshold"
     annotation (Placement(transformation(extent={{-140,-150},{-120,-130}})));
-  Buildings.Controls.OBC.CDL.Continuous.AddParameter addPar1(
+  Buildings.Controls.OBC.CDL.Reals.AddParameter addPar1(
     final p=thrTDis_2) if have_hotWatCoi
     "Discharge temperature plus threshold"
     annotation (Placement(transformation(extent={{-140,-190},{-120,-170}})));
@@ -291,7 +295,7 @@ protected
     final delayTime=durTimDisAir) if have_hotWatCoi
     "Check if it is more than threshold time"
     annotation (Placement(transformation(extent={{0,-190},{20,-170}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr5(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr5(
     final t=0.95,
     final h=valPosHys) if have_hotWatCoi
     "Check if valve position is greater than 0.95"
@@ -300,7 +304,7 @@ protected
     if have_hotWatCoi
     "Convert boolean to integer"
     annotation (Placement(transformation(extent={{0,-230},{20,-210}})));
-  Buildings.Controls.OBC.CDL.Continuous.GreaterThreshold greThr6(
+  Buildings.Controls.OBC.CDL.Reals.GreaterThreshold greThr6(
     final t=0.95,
     final h=0.85) if have_hotWatCoi
     "Check if valve position is greater than 0.95"

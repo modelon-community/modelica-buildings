@@ -76,7 +76,7 @@ model FlowDistributionPumpControl
     smoothness=Modelica.Blocks.Types.Smoothness.MonotoneContinuousDerivative1)
     "Reader for thermal loads (y[1] is cooling load, y[2] is heating load)"
     annotation (Placement(transformation(extent={{-180,20},{-160,40}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant minTSet(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant minTSet(
     k=20+273.15,
     y(final unit="K",
       displayUnit="degC"))
@@ -100,17 +100,10 @@ model FlowDistributionPumpControl
     final dpDis_nominal=dpDis_nominal)
     "Distribution network"
     annotation (Placement(transformation(extent={{40,-180},{80,-160}})));
-  Fluid.Movers.FlowControlled_dp pumCstDp(
+  Buildings.Fluid.Movers.Preconfigured.FlowControlled_dp pumCstDp(
     redeclare package Medium=Medium1,
-    per(
-      final motorCooledByFluid=false),
-    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
     m_flow_nominal=m_flow_nominal,
-    addPowerToMedium=false,
-    nominalValuesDefineDefaultPressureCurve=true,
-    use_inputFilter=false,
-    dp_nominal=dp_nominal,
-    prescribeSystemPressure=true)
+    dp_nominal=dp_nominal)
     "Pump controlled to track a pressure drop over the last connected load"
     annotation (Placement(transformation(extent={{-10,-170},{10,-150}})));
   Fluid.MixingVolumes.MixingVolume vol(
@@ -160,15 +153,10 @@ model FlowDistributionPumpControl
     each final have_speVar=false)
     "Heating terminal unit"
     annotation (Placement(transformation(extent={{-10,-22},{10,-2}})));
-  Fluid.Movers.SpeedControlled_y pumCstSpe(
+  Buildings.Fluid.Movers.Preconfigured.SpeedControlled_y pumCstSpe(
     redeclare package Medium=Medium1,
-    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
-    per(
-      pressure(
-        V_flow=m_flow_nominal/rho_default .* {0,1,2},
-        dp=dp_nominal .* {1.5,1,0.5})),
-    addPowerToMedium=false,
-    use_inputFilter=false)
+    m_flow_nominal=m_flow_nominal,
+    dp_nominal=dp_nominal)
     "Pump controlled at constant speed"
     annotation (Placement(transformation(extent={{-80,170},{-60,190}})));
   Fluid.Movers.BaseClasses.IdealSource pipPre(
@@ -182,7 +170,7 @@ model FlowDistributionPumpControl
     final control_dp=false)
     "Fictitious pipe used to prescribe pump flow rate"
     annotation (Placement(transformation(extent={{-8,170},{12,190}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant one1(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant one1(
     k=1)
     "Constant one"
     annotation (Placement(transformation(extent={{-180,190},{-160,210}})));
@@ -211,7 +199,7 @@ model FlowDistributionPumpControl
     nPorts_b1=5)
     "Distribution system with pump controlled at constant speed"
     annotation (Placement(transformation(extent={{-10,70},{10,90}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant THeaWatSup(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant THeaWatSup(
     k=T_aHeaWat_nominal)
     "Heating water supply temperature"
     annotation (Placement(transformation(extent={{-180,-10},{-160,10}})));
@@ -221,7 +209,7 @@ model FlowDistributionPumpControl
     nPorts=2)
     "Heating water source"
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},rotation=0,origin={-130,-180})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant setDp(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant setDp(
     k=dpSet)
     "Pressure difference set-point"
     annotation (Placement(transformation(extent={{-180,-140},{-160,-120}})));
@@ -321,6 +309,13 @@ Buildings.Experimental.DHC.Loads.BaseClasses.FlowDistribution</a>.
 </html>",
       revisions="<html>
 <ul>
+<li>
+August 30, 2022, by Hongxiang Fu:<br/>
+Swapped the pump models for preconfigured versions and removed the pump curve
+record <code>per</code>.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/3099\">#3099</a>.
+</li>
 <li>
 February 21, 2020, by Antoine Gautier:<br/>
 First implementation.

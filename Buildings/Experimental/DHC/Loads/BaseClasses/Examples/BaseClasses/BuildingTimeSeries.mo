@@ -1,6 +1,6 @@
 within Buildings.Experimental.DHC.Loads.BaseClasses.Examples.BaseClasses;
 model BuildingTimeSeries
-  "Building model with heating and cooling loads provided as time series"
+  "Building model with heating and/or cooling loads provided as time series"
   extends Buildings.Experimental.DHC.Loads.BaseClasses.PartialBuilding(
     redeclare package Medium=Buildings.Media.Water,
     have_heaWat=true,
@@ -18,13 +18,13 @@ model BuildingTimeSeries
     annotation (Evaluate=true, Dialog(group="Configuration"));
   parameter String filNam
     "File name with thermal loads as time series";
-  parameter Real facMulHea=QHea_flow_nominal /
+  parameter Real facMulHea(min=0)=QHea_flow_nominal /
     (QHea_flow_nominal_ref * abs(T_aLoaHea_nominal - T_aHeaWat_nominal) /
      abs(T_aLoaHea_nominal_ref - T_aHeaWat_nominal_ref) *
      mLoaHea_flow_nominal / mLoaHea_flow_nominal_ref)
     "Heating terminal unit multiplier factor"
     annotation(Dialog(enable=have_heaWat, group="Scaling", tab="Advanced"));
-  parameter Real facMulCoo=QCoo_flow_nominal /
+  parameter Real facMulCoo(min=0)=QCoo_flow_nominal /
     (QCoo_flow_nominal_ref * abs(h_aLoaCoo_nominal - hSat_nominal) /
      abs(h_aLoaCoo_nominal_ref - hSat_nominal_ref) *
      mLoaCoo_flow_nominal / mLoaCoo_flow_nominal_ref)
@@ -92,23 +92,27 @@ model BuildingTimeSeries
     "Heat flow at nominal conditions in cooling mode of reference terminal unit"
     annotation(Dialog(enable=have_chiWat, group="Reference terminal unit performance", tab="Advanced"));
 
-  parameter Modelica.Units.SI.HeatFlowRate QCoo_flow_nominal(max=-Modelica.Constants.eps)=
+  parameter Modelica.Units.SI.HeatFlowRate QCoo_flow_nominal(max=0)=
+    if have_chiWat then
     Buildings.Experimental.DHC.Loads.BaseClasses.getPeakLoad(string=
     "#Peak space cooling load",
     filNam=Modelica.Utilities.Files.loadResource(filNam))
+    else 0
     "Design cooling heat flow rate (<=0)"
     annotation (Dialog(group="Nominal condition", enable=have_chiWat));
-  parameter Modelica.Units.SI.HeatFlowRate QHea_flow_nominal(min=Modelica.Constants.eps)=
+  parameter Modelica.Units.SI.HeatFlowRate QHea_flow_nominal(min=0)=
+    if have_heaWat then
     Buildings.Experimental.DHC.Loads.BaseClasses.getPeakLoad(string=
     "#Peak space heating load",
     filNam=Modelica.Utilities.Files.loadResource(filNam))
+    else 0
     "Design heating heat flow rate (>=0)"
     annotation (Dialog(group="Nominal condition"));
-  parameter Modelica.Units.SI.MassFlowRate mChiWat_flow_nominal(min=Modelica.Constants.eps)=
+  parameter Modelica.Units.SI.MassFlowRate mChiWat_flow_nominal(min=0)=
       QCoo_flow_nominal/cp_default/(T_aChiWat_nominal - T_bChiWat_nominal)
     "Chilled water mass flow rate at nominal conditions (all units)"
     annotation (Dialog(group="Nominal condition"));
-  parameter Modelica.Units.SI.MassFlowRate mHeaWat_flow_nominal(min=Modelica.Constants.eps)=
+  parameter Modelica.Units.SI.MassFlowRate mHeaWat_flow_nominal(min=0)=
       QHea_flow_nominal/cp_default/(T_aHeaWat_nominal - T_bHeaWat_nominal)
     "Heating water mass flow rate at nominal conditions (all units)"
     annotation (Dialog(group="Nominal condition"));
@@ -147,18 +151,20 @@ model BuildingTimeSeries
     offset={0,0,0},
     columns={2,3,4},
     smoothness=Modelica.Blocks.Types.Smoothness.MonotoneContinuousDerivative1)
-    "Reader for thermal loads (y[1] is cooling load, y[2] is heating load)"
+    "Reader for thermal loads (y[1] is cooling load, y[2] is space heating load, y[3] is domestic water heat load)"
     annotation (Placement(transformation(extent={{-280,-10},{-260,10}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant minTSet(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant minTSet(
     k=293.15,
     y(final unit="K",
       displayUnit="degC"))
+    if have_heaWat
     "Minimum temperature set point"
     annotation (Placement(transformation(extent={{-280,170},{-260,190}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant maxTSet(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant maxTSet(
     k=297.15,
     y(final unit="K",
       displayUnit="degC"))
+    if have_chiWat
     "Maximum temperature set point"
     annotation (Placement(transformation(extent={{-280,210},{-260,230}})));
   replaceable Buildings.Experimental.DHC.Loads.BaseClasses.Validation.BaseClasses.FanCoil2PipeHeating terUniHea(
@@ -200,14 +206,17 @@ model BuildingTimeSeries
     nPorts_a1=1) if have_chiWat
     "Chilled water distribution system"
     annotation (Placement(transformation(extent={{120,-270},{140,-250}})));
-  replaceable Buildings.Experimental.DHC.Loads.BaseClasses.Validation.BaseClasses.FanCoil2PipeCooling terUniCoo(
+  replaceable
+    Buildings.Experimental.DHC.Loads.BaseClasses.Validation.BaseClasses.FanCoil2PipeCooling
+    terUniCoo(
     final k=k,
     final Ti=Ti,
-    final TRooHea_nominal=T_aLoaHea_nominal,
-    final QRooHea_flow_nominal=QHea_flow_nominal/facMulCoo) if have_chiWat
-  constrainedby Buildings.Experimental.DHC.Loads.BaseClasses.PartialTerminalUnit(
-    redeclare final package Medium1=Medium,
-    redeclare final package Medium2=Medium2,
+    final QEnv_flow_nominal=if have_heaWat then QHea_flow_nominal/facMulHea else -QCoo_flow_nominal/facMulCoo)
+      if have_chiWat
+    constrainedby
+    Buildings.Experimental.DHC.Loads.BaseClasses.PartialTerminalUnit(
+    redeclare final package Medium1 = Medium,
+    redeclare final package Medium2 = Medium2,
     final allowFlowReversal=allowFlowReversal,
     final facMul=facMulCoo,
     final facMulZon=1,
@@ -216,29 +225,32 @@ model BuildingTimeSeries
     final T_aChiWat_nominal=T_aChiWat_nominal,
     final T_bChiWat_nominal=T_bChiWat_nominal,
     final T_aLoaCoo_nominal=T_aLoaCoo_nominal,
-    final w_aLoaCoo_nominal=w_aLoaCoo_nominal)
-    "Cooling terminal unit"
+    final w_aLoaCoo_nominal=w_aLoaCoo_nominal) "Cooling terminal unit"
     annotation (Placement(transformation(extent={{70,36},{90,56}})));
-  Buildings.Controls.OBC.CDL.Continuous.Add addPPum
+  Buildings.Controls.OBC.CDL.Reals.Add addPPum
     "Sum pump power"
     annotation (Placement(transformation(extent={{240,70},{260,90}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant noCoo(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant noCoo(
     k=0) if not have_chiWat
     "No cooling system"
     annotation (Placement(transformation(extent={{130,70},{150,90}})));
-  Buildings.Controls.OBC.CDL.Continuous.Sources.Constant noHea(
+  Buildings.Controls.OBC.CDL.Reals.Sources.Constant noHea(
     k=0) if not have_heaWat
     "No heating system"
     annotation (Placement(transformation(extent={{130,110},{150,130}})));
-  Buildings.Controls.OBC.CDL.Continuous.Add addPFan
+  Buildings.Controls.OBC.CDL.Reals.Add addPFan
     "Sum fan power"
     annotation (Placement(transformation(extent={{240,110},{260,130}})));
-  Buildings.Controls.OBC.CDL.Continuous.MultiplyByParameter mulQReqHea_flow(u(
-        final unit="W"), final k=facMul) if have_heaLoa "Scaling"
+  Buildings.Controls.OBC.CDL.Reals.MultiplyByParameter mulQReqHea_flow(
+    u(final unit="W"),
+    final k=facMul) if have_heaLoa "Scaling"
     annotation (Placement(transformation(extent={{272,30},{292,50}})));
-  Buildings.Controls.OBC.CDL.Continuous.MultiplyByParameter mulQReqCoo_flow(u(
+  Buildings.Controls.OBC.CDL.Reals.MultiplyByParameter mulQReqCoo_flow(u(
         final unit="W"), final k=facMul) if have_cooLoa "Scaling"
     annotation (Placement(transformation(extent={{272,-10},{292,10}})));
+  Buildings.Controls.OBC.CDL.Reals.MultiplyByParameter mulQReqHot_flow(u(final
+        unit="W"), final k=facMul) if have_heaLoa "Scaling"
+    annotation (Placement(transformation(extent={{270,-130},{290,-110}})));
 protected
   parameter Modelica.Units.SI.AbsolutePressure pSat_nominal=
     Buildings.Utilities.Psychrometrics.Functions.saturationPressure(T_aChiWat_nominal)
@@ -277,9 +289,13 @@ protected
       p=Medium2.p_default, T=T_aChiWat_nominal_ref, X={X1Sat_nominal_ref, 1-X1Sat_nominal_ref})
     "Specific enthalpy of saturated air at entering water temperature for reference terminal unit";
 initial equation
-  assert(QCoo_flow_nominal < -Modelica.Constants.eps, "QCoo_flow_nominal must be negative.");
-  assert(T_aChiWat_nominal - T_bChiWat_nominal < 0, "Temperature difference (T_aChiWat_nominal - T_bChiWat_nominal) has wrong sign.");
-  assert(T_aHeaWat_nominal - T_bHeaWat_nominal > 0, "Temperature difference (T_aHeaWat_nominal - T_bHeaWat_nominal) has wrong sign.");
+  if have_chiWat then
+    assert(QCoo_flow_nominal < -Modelica.Constants.eps, "QCoo_flow_nominal must be negative.");
+    assert(T_aChiWat_nominal - T_bChiWat_nominal < 0, "Temperature difference (T_aChiWat_nominal - T_bChiWat_nominal) has wrong sign.");
+  end if;
+  if have_heaWat then
+    assert(T_aHeaWat_nominal - T_bHeaWat_nominal > 0, "Temperature difference (T_aHeaWat_nominal - T_bHeaWat_nominal) has wrong sign.");
+  end if;
 
 equation
   connect(terUniHea.port_bHeaWat,disFloHea.ports_a1[1])
@@ -322,9 +338,6 @@ equation
     annotation (Line(points={{90.8333,46},{160,46},{160,114},{238,114}},color={0,0,127}));
   connect(terUniHea.PFan,addPFan.u1)
     annotation (Line(points={{90.8333,-12},{180,-12},{180,126},{238,126}},color={0,0,127}));
-  connect(loa.y[3], QReqHotWat_flow) annotation (Line(points={{-259,0},{40,0},{
-          40,-120},{320,-120}},
-                             color={0,0,127}));
   connect(disFloCoo.port_b, mulChiWatOut[1].port_a)
     annotation (Line(points={{140,-260},{260,-260}}, color={0,127,255}));
   connect(disFloHea.port_b, mulHeaWatOut[1].port_a)
@@ -349,6 +362,10 @@ equation
           -66},{220,-66},{220,280},{268,280}}, color={0,0,127}));
   connect(disFloCoo.QActTot_flow, mulQCoo_flow.u) annotation (Line(points={{141,
           -266},{224,-266},{224,240},{268,240}}, color={0,0,127}));
+  connect(mulQReqHot_flow.y, QReqHotWat_flow)
+    annotation (Line(points={{292,-120},{320,-120}}, color={0,0,127}));
+  connect(mulQReqHot_flow.u, loa.y[3]) annotation (Line(points={{268,-120},{40,-120},
+          {40,0},{-259,0}}, color={0,0,127}));
 annotation (
     Documentation(
       info="<html>
@@ -359,6 +376,56 @@ characteristic of the building HVAC system,
 this model uses idealized fan coil models that are parameterized with 
 the peak load, determined from the provided time series, and design 
 values of the hot water and chilled water supply and return temperatures. 
+</p>
+<p>
+The time series that provide the loads are read from the file <code>filNam</code>.
+This file must have columns as shown in this example:
+<pre>
+#1
+#Heating, cooling and domestic hot water loads
+#
+#First column: Seconds in the year (loads are hourly)
+#Second column: cooling loads in Watts (as negative numbers).
+#Third column: space heating loads in Watts
+#Fourth column: domestic hot water loads in Watts
+#
+#Peak space cooling load = -146960 Watts
+#Peak space heating load = 167690 Watts
+#Peak water heating load = 9390 Watts
+double tab1(8760,4)
+0;0;18230;0
+3600;0;17520;0
+7200;0;20170;0
+10800;0;22450;0
+[further rows omitted]
+</pre>
+Specificallly, the format must be as follows:
+<ul>
+<li>
+The first column must be the time of the year in seconds.
+</li>
+<li>
+If <code>have_chiWat = true</code>, then the next column must be the space cooling load in Watts.
+Note that cooling is a negative number.<br/>
+If <code>have_chiWat = false</code>, this column must be present but it will be ignored, and hence
+it can be set to any number such as <code>0</code>.
+</li>
+<li>
+If <code>have_heaWat = true</code>, the next column must be the space heating load in Watts.<br/>
+If <code>have_heaWat = false</code>, this column must be present but it will be ignored, and hence
+it can be set to any number such as <code>0</code>.
+</li>
+<li>
+If <code>have_hotWat = true</code>, the next column must be the domestic hot water load in Watts.<br/>
+If <code>have_hotWat = false</code>, this column must be present but it will be ignored, and hence
+it can be set to any number such as <code>0</code>.
+</li>
+</ul>
+<p>
+The entry <code>double tab1(8760,4)</code> shows how many columns and rows are present.
+</p>
+<p>
+The header also needs to contain the lines that start with <code>#Peak</code> as shown in the example above.
 </p>
 <h4>Implementation details</h4>
 <p>
@@ -397,6 +464,13 @@ as specified in the \"Advanced\" tab.
 </html>",
 revisions="<html>
 <ul>
+<li>
+May 3, 2023, by David Blum:<br/>
+Applied <code>facMul</code> to domestic hot water load.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/3379\">
+issue 3379</a>.
+</li>
 <li>
 November 21, 2022, by David Blum:<br/>
 Scale <code>facMulHea</code> and <code>facMulCoo</code> with peak load.<br/>
