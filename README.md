@@ -7,7 +7,7 @@ This is the development site for the Modelica _Buildings_ library and its user g
 Stable releases including all previous releases are available from the main project site
 at http://simulationresearch.lbl.gov/modelica.
 
-Instructions for developers are available on the [wiki](https://github.com/lbl-srg/modelica-buildings/wiki).
+Instructions for developers are available on the [wiki](https://github.com/lbl-srg/modelica-buildings/wiki). This fork adds a Spawn-of-Energy-plus add-on that is binary compatible with the [Modelon Impact cloud installation](htps://impact.modelon.cloud).
 
 ## Library description
 
