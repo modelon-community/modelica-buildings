@@ -8,5 +8,5 @@ epfmi*.* filter=lfs diff=lfs merge=lfs -text
 VCRUNTIME*.dll filter=lfs diff=lfs merge=lfs -text
 Buildings/Resources/src/ThermalZones/EnergyPlus*/FMUs/Zones1.fmu filter=lfs diff=lfs merge=lfs -text
 Buildings/Resources/src/ThermalZones/EnergyPlus*/FMUs/Zones3.fmu filter=lfs diff=lfs merge=lfs -text
-Buildings/Resources/bin/spawn-*/linux64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
-Buildings/Resources/bin/spawn-*/win64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
+#Buildings/Resources/bin/spawn-*/linux64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
+#Buildings/Resources/bin/spawn-*/win64/bin/spawn* filter=lfs diff=lfs merge=lfs -text
