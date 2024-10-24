@@ -1,0 +1,57 @@
+{
+  "name": "Modelica-buildings_8",
+  "format": "1.0.0",
+  "dependencies": [],
+  "content": [
+    {
+      "relpath": "Buildings",
+      "contentType": "MODELICA",
+      "name": "Buildings",
+      "defaultDisabled": false,
+      "id": "d9c03308360147dcae243b8b34d818eb"
+    },
+    {
+      "relpath": "Resources/Views",
+      "contentType": "VIEWS",
+      "defaultDisabled": false,
+      "id": "84591c733f7d41008e966840f126ba8e"
+    },
+    {
+      "relpath": "Resources/Favorites",
+      "contentType": "FAVORITES",
+      "defaultDisabled": false,
+      "id": "b99f5c77ed4e409496152ccd6b9d6108"
+    },
+    {
+      "relpath": "Resources/CustomFunctions",
+      "contentType": "CUSTOM_FUNCTIONS",
+      "defaultDisabled": false,
+      "id": "3a31a42ffaed48ccbf5138e14e0984d4"
+    },
+    {
+      "relpath": "Resources/Custom",
+      "contentType": "GENERIC",
+      "defaultDisabled": false,
+      "id": "b6c0e176878a4da8818e810aef1b8186"
+    },
+    {
+      "relpath": "ReferenceResults",
+      "contentType": "REFERENCE_RESULTS",
+      "defaultDisabled": false,
+      "id": "c640156544b54892838e0ac6697eec4b"
+    },
+    {
+      "relpath": "Resources/ExperimentDefinitions",
+      "contentType": "EXPERIMENT_DEFINITIONS",
+      "defaultDisabled": false,
+      "id": "fa0f05e263a44714a8f742734364e87a"
+    },
+    {
+      "relpath": "bin",
+      "contentType": "GENERIC",
+      "defaultDisabled": true,
+      "id": "32f59f79dc7545e6826935a141273ec8"
+    }
+  ],
+  "executionOptions": []
+}
