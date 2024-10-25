@@ -3,7 +3,7 @@ model Building
   "Model that declares a building to which EnergyPlus objects belong to"
   extends Modelica.Blocks.Icons.Block;
 
-  constant String spawnExe="spawn-0.4.1-aa189fef75"
+  constant String spawnExe="spawn-0.4.3-7048a72798"
       "Name of the spawn executable, without extension, such as spawn-0.5.0-ab07bde9bbaaa"
     annotation (HideResult=true);
 
