@@ -1,0 +1,21 @@
+{
+  "name": "Buildings Library",
+  "format": "1.0.0",
+  "dependencies": [
+    {
+      "name": "Modelica",
+      "versionSpecifier": "4.0.0"
+    }
+  ],
+  "content": [
+    {
+      "relpath": "Buildings",
+      "contentType": "MODELICA",
+      "name": "Buildings",
+      "defaultDisabled": false,
+      "id": "a75792529398462aa66c51bb75192f07"
+    }
+  ],
+  "executionOptions": [],
+  "icon": ".impact/icon.png"
+}
