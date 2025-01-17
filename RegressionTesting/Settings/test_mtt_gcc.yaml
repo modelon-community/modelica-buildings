@@ -1,0 +1,61 @@
+# This file is used to specify mtt test configuration
+MTT:
+  this-directory: RegressionTesting/Settings   # Directory of this file (relative path)  # Will be overwritten by Jenkins!
+  save-artifacts: false  # Will be overwritten by Jenkins!
+  mtt-result-dir: #Results  # Default if empty: <this-directory>/../Results
+  config-dir: #myCfg # Default if empty: <mtt-result-dir>/Configuration  # Will be overwritten by Jenkins!
+  artifact-dir: #myArt # Default if empty: <mtt-result-dir>/Artifacts  # Will be overwritten by Jenkins!
+  output-dir: #myOutFiles #modelica/tests/Output-Std-32 # Default if empty: <mtt-result-dir>/Output  # Will be overwritten by Jenkins!
+  run-directory: RunDirectory
+  generate-dependency-file: false # Generate .json file containing all modelica dependencies for the tests in test packages.  # Will be overwritten by Jenkins!
+  test-selection:
+    include-failed-tests: true
+    mode: false # true or false # MTT FLAG: "--use-test-selection"
+    path-input-files: lastTestSelectionOutput # path to json files needed for test selection # MTT FLAG: "--testselect-input-filepath={PATH}"
+    external-dependency-paths:
+
+  library:
+    skipfile: RegressionTesting/Settings/skipFile.xml #data/skipfile.txt
+    includefile: #data/includefile.txt
+    path-config: # ExampleTestLibrary/LibraryConfig/test_mtt_modelicapath.yaml
+    packages: # Names of Modelica packages to be tested, sub-packages can be specified with dot-notation e.g. Library.Tests.PerformanceTests
+    - Buildings
+
+    reference: RegressionTesting/ReferenceFiles # Path to reference files for trajectory verification
+    dependencies: # Paths to all required Modelica packages, Modelica Standard Library is included by default  # Will be overwritten by Jenkins!
+    - Buildings
+
+    #impact-project: resolved_workspace.json
+    test-type: experiment # Will be overwritten by Jenkins!
+    split-depth: 2
+    variable-source: reference  # Will be overwritten by Jenkins!
+    use-name-table: false
+
+  compiler: 
+    name: OCT 
+    version:  
+    fmu-model-name: false # If the compiled .fmu will be named after the model instead of just model.fmu
+    options: 
+      c_compiler: gcc
+      jvm_args: -Xmx8g 
+      check_derivative_annotations: true
+    target-type: FMU 2.0 CS  # Will be overwritten by Jenkins!
+
+  simulator:
+    name: OCT  # Will be overwritten by Jenkins!
+    time-limit: 3600
+    max-nbr-vars: 100
+    options: 
+        tolerance: '0.01'
+
+  verifier: 
+    type: trajectory # Will be overwritten by Jenkins!
+
+  report:
+    output: HTML,JUnit,Hash  # Will be overwritten by Jenkins!
+    
+  post-process-scripts:
+    run-scripts: false # true/false
+    trigger-condition: # condition to fulfill to run extra scripts: compile_fail/simulate_fail/verify_fail/verify_success/testcase_status/always.
+    path: # relative path to directory containing python modules.
+    python-module: # python module name (one .py script or directory containing .py scripts).

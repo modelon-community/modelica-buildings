@@ -1,0 +1,4 @@
+Package: # top level key for Releaser config 
+    package_name: Buildings # Package name of the library to release.
+    release_version: 2025.1 # coordinate release version number.
+    project_version: 11.1.0
