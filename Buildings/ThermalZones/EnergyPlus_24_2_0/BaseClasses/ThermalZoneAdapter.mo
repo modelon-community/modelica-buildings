@@ -44,7 +44,7 @@ model ThermalZoneAdapter
 
   parameter Integer nFluPor
     "Number of fluid ports (Set to 2 for one inlet and one outlet)";
-  final parameter Modelica.Units.SI.Area AFlo(fixed=false) "Floor area";
+  final parameter Modelica.Units.SI.Area AFlo(fixed=false, start=1.0) "Floor area";
   final parameter Modelica.Units.SI.Volume V(fixed=false, start=1.0) "Zone volume";
   final parameter Real mSenFac(fixed=false, start=1.0)
     "Factor for scaling the sensible thermal mass of the zone air volume";
